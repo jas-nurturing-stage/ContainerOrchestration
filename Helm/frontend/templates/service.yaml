@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "lrcs.fullname" . }}-frontend
+  labels:
+    app: {{ include "lrcs.name" . }}-frontend
+    tier: {{ include "lrcs.name" . }}-frontend
+    environment: {{ .Values.environment }}
+spec:
+  selector:
+    app: {{ include "lrcs.name" . }}-frontend
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.targetPort }}
+  type: {{ .Values.service.type }}
