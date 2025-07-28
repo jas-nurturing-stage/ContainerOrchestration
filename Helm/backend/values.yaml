@@ -29,6 +29,7 @@ secretRefName: backend-secrets
 secret:
   atlasuri: bW9uZ29kYjovL2FkbWluOnNlY3JldEBtb25nby5tb25nb2RiLnN2Yy5jbHVzdGVyLmxvY2FsOjI3MDE3L2xyY3M/YXV0aFNvdXJjZT1hZG1pbg==
   jwtsecretkey: dGhpc2lzd3RzZWNyZXRrZXQ=
+  HASH_KEY: dGhpc2lzbXloYXNoa2V5
   port: MzAwMQ==
 
 # Liveness probe for backend health
