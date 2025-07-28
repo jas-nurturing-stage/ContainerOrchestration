@@ -1,8 +1,8 @@
-{{- define "learner-insights.name" -}}
+{{- define "lrcs.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end }}
 
-{{- define "learner-insights.fullname" -}}
+{{- define "lrcs.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else }}

@@ -1,0 +1,115 @@
+pipeline { 
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                dir('lrcs-backend') {
+                    git(
+                        url: "https://github.com/jas-nurturing-stage/LRCS_backend.git",
+                        branch: 'main',
+                        credentialsId: 'Github'
+                    )
+                }
+                dir('lrcss-frontend') {
+                    git(
+                        url: "https://github.com/jas-nurturing-stage/LRCS_frontend.git",
+                        branch: 'main',
+                        credentialsId: 'Github'
+                    )
+                }
+                stash name: 'all-code', includes: '**'
+            }
+        }
+        stage("Test") {
+            parallel {
+                stage('Test Backend') { // Corrected: Backend first
+                    agent {
+                        docker {
+                            image 'node:22-slim'
+                        }
+                    }
+                    environment {
+                        NPM_CONFIG_CACHE = '.npm'
+                    }
+                    steps {
+                        unstash 'all-code'
+                        dir("lrcs-backend") {
+                            sh 'npm install && npm test'
+                        }
+                    }
+                }
+                stage('Test Frontend') { // Corrected: Frontend second
+                    agent {
+                        docker {
+                            image 'node:22-slim'
+                        }
+                    }
+                    environment {
+                        NPM_CONFIG_CACHE = '.npm'
+                    }
+                    steps {
+                        unstash 'all-code'
+                        dir("lrcs-frontend") {
+                            sh 'npm install && npx react-scripts test --watchAll=false'
+                        }
+                    }
+                }
+            }
+        }
+        
+        stage('Build Image from Dockerfile') {
+            parallel {
+                stage('Build Backend Image') {
+                    steps {
+                        script {
+                            docker.build("docjas143/lrcs-backend:${BUILD_NUMBER}", "./lrcs-backend")
+                        }
+                    }
+                }
+                stage('Build Frontend Image') {
+                    steps {
+                        script {
+                            docker.build("docjas143/lrcs-frontend:${BUILD_NUMBER}", "--build-arg REACT_APP_API_BASE_URL=http://172.29.176.1:3001 ./lrcs-frontend")
+                        }
+                    }
+                }
+            }
+        }
+        stage('Push Docker Images') {
+            parallel {
+                stage('Build Backend Image') {
+                    steps {
+                        script {
+                            docker.withRegistry('', 'docker-hub-creds') {
+                                docker.image("docjas143/lrcs-backend:${BUILD_NUMBER}").push()
+                            }
+                        }
+                    }
+                }
+                stage('Build Frontend Image') {
+                    steps {
+                        script {
+                            docker.withRegistry('', 'docker-hub-creds') {
+                                docker.image("docjas143/lrcs-frontend:${BUILD_NUMBER}").push()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Helm Deploy') {
+            steps {
+                sh """
+                    helm upgrade --install lrcs-prod ./helm \
+                    -f ./helm/values.yaml \
+                    --set backend.image.repository=docjas143/lrcss-backend \
+                    --set backend.image.tag=${BUILD_NUMBER} \
+                    --set frontend.image.repository=docjas143/lrcs-frontend \
+                    --set frontend.image.tag=${BUILD_NUMBER} \
+                    --namespace lrcs \
+                    --create-namespace
+                """
+            }
+        }
+    }
+}
