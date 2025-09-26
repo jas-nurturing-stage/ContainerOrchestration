@@ -17,7 +17,7 @@ spec:
       terminationGracePeriodSeconds: 10 # recommended for MongoDB
       containers:
       - name: mongo
-        image: mongo:latest           # using official MongoDB image
+        image: mongo:7.0           # using official MongoDB image
         ports:
         - containerPort: 27017
         volumeMounts:
