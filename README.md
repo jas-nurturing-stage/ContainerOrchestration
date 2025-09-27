@@ -60,7 +60,7 @@ A predefined namespace file is available at: `k8s/namespace.yml`
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: learner-insights
+  name: lrcs
 ```
 🚀 Apply the Namespace
 Use the following command to create the namespace in your cluster:
@@ -1084,7 +1084,7 @@ To configure the global library in Jenkins:
 | **Retrieval Method**        | `Modern SCM`                                                          |
 | **Source Code Management**  | `Git`                                                                 |
 | **Project Repository**      | `https://github.com/jas-nurturing-stage/sharedlibrary-jenkins.git`          |
-| **Credentials**             | `psagar-dev/******` *(Select your GitHub credentials if the repo is private)* |
+| **Credentials**             | `jas-nurturing-stage/******` *(Select your GitHub credentials if the repo is private)* |
 
 Once the library is configured, you can load it in your `Jenkinsfile` using the following syntax:
 
